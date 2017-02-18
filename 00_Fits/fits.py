@@ -1,0 +1,243 @@
+import numpy as np
+import pandas as pd 
+import matplotlib.pyplot as plt
+from scipy import optimize
+from scipy.optimize import curve_fit
+import os
+
+Gpath = os.getcwd() + '/graphs/'
+
+# Statistic Functions_________________________
+
+def SS_xx(X): # 
+	x_bar = np.average(X)
+	sum = 0
+	for x in X:
+		sum += (x-x_bar)**2
+	return sum
+
+def SS_xy(X,Y):
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		print(len(X),len(Y))
+		raise ValueError
+
+	x_bar = np.average(X)
+	y_bar = np.average(Y)
+
+	sum = 0
+	N = len(X)
+	for n in range(N):
+		sum += (X[n]-x_bar)*(Y[n]-y_bar)
+
+	return sum
+
+def m_exp(X,Y): # expected slope
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		print(len(X),len(Y))
+		raise ValueError
+
+	return SS_xy(X,Y)/SS_xx(X)
+
+def b_exp(X,Y): # expected y-intercept
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		print(len(X),len(Y))
+		raise ValueError
+
+	y_bar = np.average(Y)
+	x_bar = np.average(X)
+	m = m_exp(X,Y)
+
+	return y_bar - m*x_bar
+
+def SS_yy(Y): # total sum of squares, Y is np array
+	y_bar = np.average(Y)
+	sum = 0
+	for y in Y:
+		sum += (y-y_bar)**2
+	return sum
+
+def SS_E(X,Y): # error sum of squares, Y is np array, m and b are linear parameters
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		raise ValueError
+
+	N = len(X)
+	m = m_exp(X,Y)
+	b = b_exp(X,Y)
+
+	sum = 0
+	for n in range(N):
+		y_exp = m*X[n] + b
+		sum += (Y[n]-y_exp)**2
+	return sum
+
+def SS_R(X,Y): # Regression sum of squares
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		raise ValueError
+
+	return SS_yy(Y) - SS_E(X,Y)
+
+def s_yx2(X,Y): # variance of y(x)
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		raise ValueError
+
+	deg_free = len(X)-2 # degrees of freedom, length of array minus the 2 regression params
+	return SS_E(X,Y)/deg_free
+
+def s_m2(X,Y): # variance of slope
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		raise ValueError
+
+	return s_yx2(X,Y)/SS_xx(X)
+
+def s_b2(X,Y): # variance of y-intercept
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		print(len(X),len(Y))
+		raise ValueError
+
+	n = len(X)
+	x_bar2 = np.average(X)**2
+
+	return s_yx2(X,Y) * ( (1/n) + (x_bar2/SS_xx(X)) )
+
+def RMSE(X,Y): # room mean square error
+	if len(X) != len(Y):
+		print("X and Y must be same length")
+		raise ValueError
+
+	n = len(X)
+	return np.sqrt(SS_E(X,Y)/n)
+
+def R2(X,Y): # Coefficient of Determination - the variability of y_i accounted for by linear model
+	return SS_R(X,Y)/SS_yy(Y)
+
+def R2_2(X,Y,func,p): # R2 for gaussian
+	ss_e = 0
+	for i in range(len(X)):
+		ss_e += (Y[i]-func(X[i],p[0],p[1],p[2],p[3],p[4],p[5]))**2
+	ss_yy = 0
+	for i in range(len(X)):
+		ss_yy += (Y[i] - np.average(Y))**2
+	ss_r = ss_yy - ss_e
+	return ss_r/ss_yy
+
+# Dynamic K___________________________________
+
+d1 = {'kg' : [.1,.2,.3,.4,.5,.6,.7,.8,.9,1,1.1,1.2,1.3,1.4,1.5] ,
+		'rad/s' : [3.55,2.47,1.97,1.61,1.54,1.38,1.31,1.32,1.23,1.12,1.09,1.11,1.01,.98,.98]}
+T1 = pd.DataFrame(d1)
+
+def delta_k(m,m_err): # uncertainty in k
+	return (m_err/m**2)
+
+def delta_m_0(k,k_err,b,b_err):
+	return np.sqrt( (k*b_err)**2 + (b*k_err)**2 )
+
+def plot1(fig_num=1,printA=True,saveA=False):
+	X = np.array(T1['kg'])
+	Y = np.array(1/T1['rad/s']**2)
+
+	m,m_err = m_exp(X,Y), 2*np.sqrt(s_m2(X,Y))
+	b,b_err = b_exp(X,Y), 2*np.sqrt(s_b2(X,Y))
+	k,k_err = (1/m), delta_k(m,m_err)
+	m_0,m_0_err = b*k, delta_m_0(k,k_err,b,b_err)
+	X2 = np.linspace(0,1.6,1000)
+	Y2 = m*X2 + b
+
+	if printA == True:
+		print("")
+		print("Static:")
+		print("m_exp = %s +- %s" % (m,m_err) )
+		print("b_exp = %s +- %s" % (b,b_err) )
+		print("k = %s +- %s N/m" % (k,k_err) )
+		print("m_0 = %s +- %s kg" % (m_0,m_0_err) )
+		print("SS_E = %s" % SS_E(X,Y) )
+		print("RMSE = %s" % RMSE(X,Y) )
+		print("R2 = %s" % R2(X,Y) )
+
+
+	fig = plt.figure(fig_num,figsize=(30,15))
+	plt.tick_params(axis='both', which='major', labelsize=20)
+	plt.xlabel('mass [kg]',fontsize=25)
+	plt.ylabel('$1/\\omega^2$ [s/rad]$^2$',fontsize=25)
+	plt.plot(X,Y,'bo',label="Data",linewidth=2)
+	plt.plot(X2,Y2,'r',label="LeastSquare Fit",linewidth=2)
+	plt.xlim(0,1.6)
+	plt.ylim(0,1.2)
+	plt.annotate('y(x) = m*x + b\nm: %s +/- %s\nb: %s +/- %s\nRMSE: %s' % (round(m,3),round(m_err,3),round(b,3),round(b_err,3),round(RMSE(X,Y),3)),
+	 (.6,.2), size=20, color='r',fontsize=25)
+	plt.tight_layout()
+	plt.legend(loc=2,fontsize=25,numpoints=1)
+
+	if saveA == False:
+		plt.show()
+	else: 
+		fig.savefig(Gpath+'StaticK.png')
+		plt.close(fig)
+
+	return
+
+# Double Gaussian_____________________________
+
+d2 = {'mm' : np.arange(-2,2.1,.1),
+	'cnt' : [1.01,1.74,2.71,3.93,4.30,8.25,9.52,10.35,14.62,16.76,19.97,26.87,30.49,33.27,
+	40.34,42.65,45.25,48.64,47.93,47.93,49.28,44.90,43.45,43.73,47.29,45.93,51.36,54.62,
+	49.72,43.87,34.91,21.20,14.23,9.30,4.77,4.30,3.31,1.89,1.41,1.03,0.94]}
+T2 = pd.DataFrame(d2)
+
+def gauss(x,x0,xmax,sigma):
+	return xmax * np.exp( -(x-x0)**2 / (2*sigma**2) )
+
+def fitfunc(x,x0_1,xmax_1,sigma_1,x0_2,xmax_2,sigma_2):
+	return gauss(x,x0_1,xmax_1,sigma_1) + gauss(x,x0_2,xmax_2,sigma_2)
+
+def plot2(fig_num=2,printA=True,saveA=False):
+	X = np.array(T2['mm'])
+	Y = np.array(T2['cnt'])
+
+	x0_1,xmax_1,sigma_1 = -.2,50,.6
+	x0_2,xmax_2,sigma_2 = .8,40,.3
+	X2 = np.linspace(-2,2,1000)
+	Y2 = fitfunc(X2,x0_1,xmax_1,sigma_1,x0_2,xmax_2,sigma_2)
+
+	p = [x0_1,xmax_1,sigma_1,x0_2,xmax_2,sigma_2]
+	popt,pcov = curve_fit(fitfunc,X,Y,p0=p)
+	Y3 = fitfunc(X2,popt[0],popt[1],popt[2],popt[3],popt[4],popt[5])
+	if printA == True:
+		print("")
+		print("Gaussian Curves:")
+		print("Peak 1 Manual: x0, xmax, sigma = %s mm, %s counts, %s mm" % (x0_1,xmax_1,sigma_1) )
+		print("Peak 2 Manual: x0, xmax, sigma = %s mm, %s counts, %s mm" % (x0_2,xmax_2,sigma_2) )
+		print("Peak 1 Auto: x0, xmax, sigma = %s mm, %s counts, %s mm" % ( round(popt[0],3),round(popt[1],3),round(popt[2],3)) )
+		print("Peak 2 Auto: x0, xmax, sigma = %s mm, %s counts, %s mm" % ( round(popt[3],3),round(popt[4],3),round(popt[5],3)) )
+		print("Peak Separation = %s mm" % round(popt[3]-popt[0],3))
+		print("R2 = %s" % R2_2(X,Y,fitfunc,popt) )
+	
+	fig = plt.figure(fig_num,figsize=(30,15))
+	plt.tick_params(axis='both', which='major', labelsize=20)
+	plt.xlim(-2,2)
+	plt.xlabel('Position [mm]',fontsize=25)
+	plt.ylabel('Counts',fontsize=25)
+	plt.plot(X,Y,'bo',label='Data',linewidth=2)
+	plt.plot(X2,Y2,'m',label='Manual Fit',linewidth=2)
+	plt.plot(X2,Y3,'r',label='Auto Fit',linewidth=2)
+	plt.vlines(popt[0],ymin=0,ymax=popt[1],color='k',linewidth=2)
+	plt.vlines(popt[3],ymin=0,ymax=fitfunc(popt[3],popt[0],popt[1],popt[2],popt[3],popt[4],popt[5]),color='k',linewidth=2)
+	plt.hlines(20,xmin=popt[0],xmax=popt[3],color='k',linewidth=2)
+	plt.annotate('$\Delta X\ = %s\ mm$' % round(popt[3]-popt[0],2), (popt[0]+.1,21),color='k',fontsize=20)
+	plt.legend(loc=2,numpoints=1,fontsize=25)
+	plt.tight_layout()
+	if saveA == False:
+		plt.show()
+	else: 
+		fig.savefig(Gpath+'GaussFits.png')
+		plt.close(fig)
+
+	return
