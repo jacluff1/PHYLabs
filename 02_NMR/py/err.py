@@ -66,24 +66,16 @@ def quad_err(name,alpha,beta,gamma,T_data,A_data):
 def exp_err(tau_2,A_0,T_data,A_data,double='no'):
 	T = np.array(T_data)
 	A = np.array(A_data)
-	# if double != 'no':
-	# 	T = T * (1/2)
+	
+	one = dt/np.log(A_0.val/A)
+	two = A_0.err/(A*np.log(A_0.val/A)**2)
+	three = (A_0.val*dA)/(A**2 * np.log(A_0.val/A)**2)
 
-	# T2 = np.average(T) * np.log(np.average(A)/A_0.val)
-	# T2 = T * np.log(A/A_0.val)
-	T2 = -T/np.log(A/A_0.val)
-	print(T2)
+	dt2 = np.average( np.sqrt(one**2 + two**2 + three**2) )
+	t2 = np.average( T/np.log(A_0.val/A) )
 
-	one = dt * np.log(A/A_0.val)
-
-	two = T * dA/A
-
-	three = -T * A_0.err/A_0.val 
-
-	dT2 = np.sqrt(one**2 + two**2 + three**2)
-
-	tau2_val = np.average(T2)
-	tau2_err = np.average(dT2)
+	tau2_val = t2
+	tau2_err = dt2
 	if double != 'no':
 		tau2_val *= 1/2
 		tau2_err *= 1/2

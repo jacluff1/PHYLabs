@@ -19,6 +19,39 @@ def testfit(amount,index,par):
 
 # EXPERIMENTS
 
+def part1():
+	tau_2 = 2.25*20 # 1e-6 s
+	tau_2 *= 1000 # ms
+	return tau_2
+
+def part3():
+	a1,r1 = 3.5,100 # cm,ms
+	a2,r2 = 1.9,10 # cm,ms
+	x = np.array([r1,r2])
+	x = np.log(x)
+	y = np.array([a1,a2])
+
+	X = np.linspace(1,100,1000)
+	X = np.log(X)
+
+	m = df.m_exp(x,y)
+	b = df.b_exp(x,y)
+
+	Y = m*X + b
+
+	y_goal = a1/np.e 
+	i_goal = dg.nearest(Y,y_goal)
+	x_goal = X[i_goal]
+
+	print("approx tau_1", np.exp(x_goal))
+
+	fig = plt.figure(figsize=(15,7.5))
+	plt.plot(x,y,'bs')
+	plt.plot(X,Y,'-r')
+	plt.plot(x_goal,y_goal,'g*')
+	plt.show()
+	return
+
 def part4(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 	#plt.xscale('log')
 
@@ -68,7 +101,8 @@ def part4(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 			plt.show()
 
 	tau_1 = err.err4('part4',t_1)
-	tau1 = err.quad_err('part4',alpha,beta,A_0,tau,amp)
+	# tau1 = err.quad_err('part4',alpha,beta,A_0,tau,amp)
+	tau1 = err.quad_err('part4',alpha,beta,A_0,T,A_f)
 
 	if printA == True:
 		print("tau_1 = %s +- %s" % (tau_1.pval,tau_1.perr))
@@ -92,7 +126,8 @@ def part5(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
 	A_0 = dg.var('A_0',par_f[0],.2,'V')
 	tau_2 = dg.var('part5',par_f[1],.8,'ms')
-	tau2 = err.exp_err(tau_2,A_0,tau,amp)
+	# tau2 = err.exp_err(tau_2,A_0,tau,amp)
+	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:])
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -162,7 +197,8 @@ def part6(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 			plt.show()
 
 	tau_2 = err.err6('part6',t_2)
-	tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
+	# tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
+	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
 
 	if printA == True:
 		print("tau2 = %s +- %s" % (tau_2.pval,tau_2.perr))
@@ -210,7 +246,8 @@ def part7(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 			plt.show()
 
 	tau_2 = err.err7('part7',t_2)
-	tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
+	# tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
+	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
 
 	if printA == True:
 		print("tau2 = %s +- %s" % (tau_2.pval,tau_2.perr))
@@ -264,7 +301,8 @@ def part8a(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 			plt.show()
 
 	tau_1 = err.err8a('part8a',t_1)
-	tau1 = err.quad_err('part8a',alpha,beta,A_0,tau,amp)
+	# tau1 = err.quad_err('part8a',alpha,beta,A_0,tau,amp)
+	tau1 = err.quad_err('part8a',alpha,beta,A_0,T,A_f)
 
 	if printA == True:
 		print("tau_1_g = %s +- %s" % (tau_1.pval,tau_1.perr))
@@ -312,7 +350,8 @@ def part8b(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 			plt.show()
 
 	tau_2 = err.err8b('part8b',t_2)
-	tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
+	# tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
+	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
 
 	if printA == True:
 		print("tau_2_g = %s +- %s" % (tau_2.pval,tau_2.perr))
