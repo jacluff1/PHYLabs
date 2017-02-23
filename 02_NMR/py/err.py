@@ -6,31 +6,33 @@ import numpy as np
 dA = .005 # V
 dt = .5 # ms
 
-def err4(name,t):
+def err4(t):
 	"""calculates error for part4
 	args
 	----
 	name: name that goes into returned djak.gen.var object
 	t: djak.gen.var class object
 	"""
-	return dg.var(name,np.exp(t.val),np.exp(t.val)*t.err,'ms')
+	return dg.var(np.exp(t.val),np.exp(t.val)*t.err,'ms')
 
-def err6(name,t):
+def err5(t):
 	"""calculates error for part6
 	args
 	----
 	name: name that goes into returned djak.gen.var object
 	t: djak.gen.var class object
 	"""
-	return dg.var(name,(1/2)*t.val,(1/2)*t.err,'ms')
+	return dg.var((1/2)*t.val,(1/2)*t.err,'ms')
 
-err7 = err6
+err6 = err5
+
+err7 = err5
  
 err8a = err4
 
-err8b = err6
+err8b = err5
 
-def quad_err(name,alpha,beta,gamma,T_data,A_data):
+def quad_err(alpha,beta,gamma,T_data,A_data):
 	T = np.array(T_data)
 	A = np.array(A_data)
 
@@ -59,11 +61,11 @@ def quad_err(name,alpha,beta,gamma,T_data,A_data):
 	T1 = T + (1/(2*alpha.val)) * (beta.val - short)
 	tau1_val = np.exp(np.average(T1))
 
-	tau1 = dg.var(name,tau1_val,tau1_err,'ms')
+	tau1 = dg.var(tau1_val,tau1_err,'ms')
 
 	return tau1
 
-def exp_err(tau_2,A_0,T_data,A_data,double='no'):
+def exp_err(A_0,T_data,A_data,double='no'):
 	T = np.array(T_data)
 	A = np.array(A_data)
 	
@@ -80,7 +82,7 @@ def exp_err(tau_2,A_0,T_data,A_data,double='no'):
 		tau2_val *= 1/2
 		tau2_err *= 1/2
 
-	tau2 = dg.var(tau_2.name,tau2_val,tau2_err,'ms')
+	tau2 = dg.var(tau2_val,tau2_err,'ms')
 
 	return tau2
 

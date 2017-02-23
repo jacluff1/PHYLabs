@@ -11,7 +11,7 @@ def quadfit(par,t):
 	return par[0]*(t-par[1])**2 + par[2]*(t-par[1]) + par[3]
 
 def expfit(par,t):
-	return par[0]*np.exp(-t/par[1])
+	return par[0]*np.exp(-t/par[1]) + par[2]
 
 def testfit(amount,index,par):
 	par[index] = par[index] + amount
@@ -20,9 +20,7 @@ def testfit(amount,index,par):
 # EXPERIMENTS
 
 def part1():
-	tau_2 = 2.25*20 # 1e-6 s
-	tau_2 *= 1000 # ms
-	return tau_2
+	return .138
 
 def part3():
 	a1,r1 = 3.5,100 # cm,ms
@@ -73,10 +71,13 @@ def part4(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 	# testfit(.02,1,par_f) # t_0
 	A_f = quadfit(par_f,T)
 
-	alpha = dg.var('alpha',par_f[0],2,'V/s^2')
-	beta = dg.var('beta',par_f[2],.7,'V/s')
-	t_1 = dg.var('t_0',par_f[1],.02,'ms')
-	A_0 = dg.var('A_0',par_f[3],.2,'V')
+	alpha = dg.var(par_f[0],2,'V/s^2')
+	beta = dg.var(par_f[2],.7,'V/s')
+	t_1 = dg.var(par_f[1],.02,'ms')
+	A_0 = dg.var(par_f[3],.2,'V')
+
+	tau_1 = err.err4(t_1)
+	# tau1 = err.quad_err(alpha,beta,A_0,T,A_f)
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -87,7 +88,7 @@ def part4(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		plt.plot(tau,amp, 's', color='b', label='data')
 		plt.plot(T,A_m,'-', color='m', lw=2, label='manual fit')
 		plt.plot(T,A_f,'-', color='r', lw=2, label='least square fit')
-		note='$A = \\alpha (t_q-t_1)^2 + \\beta (t_q-t_1) + \gamma$\n$\\alpha = %s \pm %s\ [V/s^2]$\n$\\beta = %s \pm %s\ [V/s]$\n$\\gamma = %s \pm %s\ [V]$\n$t_1 = %s \pm %s\ [ms]$' % (alpha.pval,alpha.perr,beta.pval,beta.perr,A_0.pval,A_0.perr,t_1.pval,t_1.perr)
+		note='$A = \\alpha (t_q-t_1)^2 + \\beta (t_q-t_1) + \gamma$\n$\\alpha = %s \pm %s\ [V/s^2]$\n$\\beta = %s \pm %s\ [V/s]$\n$\\gamma = %s \pm %s\ [V]$\n$t_1 = %s \pm %s\ [ms]$\n$\\tau_1 = %s \pm %s\ [ms]$' % (alpha.pval,alpha.perr,beta.pval,beta.perr,A_0.pval,A_0.perr,t_1.pval,t_1.perr,tau_1.pval,tau_1.perr)
 		plt.annotate(note, xy=(2.5,4), color='r', fontsize=fs)
 	
 		plt.xlim([min(T),max(T)])
@@ -100,15 +101,11 @@ def part4(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		else:
 			plt.show()
 
-	tau_1 = err.err4('part4',t_1)
-	# tau1 = err.quad_err('part4',alpha,beta,A_0,tau,amp)
-	tau1 = err.quad_err('part4',alpha,beta,A_0,T,A_f)
-
 	if printA == True:
 		print("tau_1 = %s +- %s" % (tau_1.pval,tau_1.perr))
-		print("tau1 = %s +- %s" % (tau1.pval,tau1.perr))
+		# print("tau1 = %s +- %s" % (tau1.pval,tau1.perr))
 
-	return tau_1,tau1
+	return tau_1
 
 def part5(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
@@ -116,18 +113,19 @@ def part5(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 	amp = np.array([7.5, 6.8, 6.0, 5.3, 4.9, 4.2, 4.0, 3.6, 3.4, 3.0, 2.8, 2.6, 2.4, 2.2, 2.0, 1.8]) # V
 
 	T = np.linspace(0,30,1000)
-	par_m = [8,10]
+	par_m = [8,10,.01]
 	A_m = expfit(par_m,T)
 
 	par_f = df.least_square(expfit,par_m,tau,amp)
 	# testfit(.2,0,par_f) # A_0
-	# testfit(.8,1,par_f) # tau_2
+	# testfit(.3,1,par_f) # tau_2
+	# testfit(.1,2,par_f) # C
 	A_f = expfit(par_f,T)
 
-	A_0 = dg.var('A_0',par_f[0],.2,'V')
-	tau_2 = dg.var('part5',par_f[1],.8,'ms')
-	# tau2 = err.exp_err(tau_2,A_0,tau,amp)
-	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:])
+	A_0 = dg.var(par_f[0],.2,'V')
+	tau_2 = dg.var(par_f[1],.3,'ms')
+	# tau2 = err.exp_err(A_0,T[1:],A_f[1:],double='yes')
+	C = dg.var(par_f[2],.1,'V')
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -138,7 +136,7 @@ def part5(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		plt.plot(tau,amp, 's', color='b', label='data')
 		plt.plot(T,A_m,'-', color='m', lw=2, label='manual fit')
 		plt.plot(T,A_f,'-', color='r', lw=2, label='least square fit')
-		note='$A = A_0 e^{-t/\\tau_2}$\n$A_0 = %s \pm %s\ [V]$\n$\\tau_2 = %s \pm %s\ [ms]$' % (A_0.pval,A_0.perr,tau_2.pval,tau_2.perr)
+		note='$A = A_0 e^{-t/2\\tau_2} + C$\n$A_0 = %s \pm %s\ [V]$\n$\\tau_2 = %s \pm %s\ [ms]$\n$C = %s \pm %s\ [V]$' % (A_0.pval,A_0.perr,tau_2.pval,tau_2.perr,C.pval,C.perr)
 		plt.annotate(note, xy=(12,3), color='r', fontsize=fs)
 		
 		plt.xlim([min(T),max(T)])
@@ -153,26 +151,33 @@ def part5(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
 	if printA == True:
 		print("tau_2 = %s +- %s" % (tau_2.pval,tau_2.perr))
-		print("tau2 = %s +- %s" % (tau2.pval,tau2.perr))
+		# print("tau2 = %s +- %s" % (tau2.pval,tau2.perr))
 
-	return tau_2, tau2 
+	return tau_2
 
 def part6(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
-	tau = np.arange(20,120,20) # ms
-	amp = np.array([4.2, 2.10, 1.09, .62, .34]) # V
+	# tau = np.arange(20,120,20) # ms
+	# amp = np.array([4.2, 2.10, 1.09, .62, .34]) # V
+	tau = np.arange(2,18,2) # ms
+	amp = np.array([9.52, 8.02, 6.5, 5.3, 3.96, 3.06, 2.36, 1.70])
 
-	T = np.linspace(0,120,1000)
-	par_m = [8,30]
+	T = np.linspace(0,40,1000)
+	par_m = [12,10,-1]
 	A_m = expfit(par_m,T)
 
 	par_f = df.least_square(expfit,par_m,tau,amp)
 	# testfit(.5,0,par_f) # A_0
-	# testfit(2,1,par_f) # t_2
+	# testfit(.3,1,par_f) # t_2
+	# testfit(.2,2,par_f) # C
 	A_f = expfit(par_f,T)
 
-	A_0 = dg.var('A_0',par_f[0],.5,'V')
-	t_2 = dg.var('2 tau_2',par_f[1],2,'ms')
+	A_0 = dg.var(par_f[0],.5,'V')
+	t_2 = dg.var(par_f[1],.3,'ms')
+	C = dg.var(par_f[2],.2,'V')
+
+	tau_2 = err.err6(t_2)
+	# tau2 = err.exp_err(A_0,T[1:],A_f[1:],double='yes')
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -183,8 +188,8 @@ def part6(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		plt.plot(tau,amp, 's', color='b', label='data')
 		plt.plot(T,A_m,'-', color='m', lw=2, label='manual fit')
 		plt.plot(T,A_f,'-', color='r', lw=2, label='least square fit')
-		note='$A = A_0 e^{-t/2\\tau_2}$\n$A_0 = %s \pm %s\ [V]$\n$2\\tau_2 = %s \pm %s\ [ms]$' % (A_0.pval,A_0.perr,t_2.pval,t_2.perr)
-		plt.annotate(note, xy=(60,3), color='r', fontsize=fs)
+		note='$A = A_0 e^{-t/2\\tau_2} + C$\n$A_0 = %s \pm %s\ [V]$\n$\\tau_2 = %s \pm %s\ [ms]$\n$C = %s \pm %s\ [V]$' % (A_0.pval,A_0.err,tau_2.pval,tau_2.perr,C.pval,C.perr)
+		plt.annotate(note, xy=(20,3), color='r', fontsize=fs)
 
 		plt.xlim([min(T),max(T)])
 		plt.legend(loc='best', numpoints=1)
@@ -196,32 +201,35 @@ def part6(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		else:
 			plt.show()
 
-	tau_2 = err.err6('part6',t_2)
-	# tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
-	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
-
 	if printA == True:
 		print("tau2 = %s +- %s" % (tau_2.pval,tau_2.perr))
-		print("tau2 = %s +- %s" % (tau2.pval,tau2.perr))
+		# print("tau2 = %s +- %s" % (tau2.pval,tau2.perr))
 
-	return tau_2, tau2
+	return tau_2
 
 def part7(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
-	tau = np.arange(20,124,20) # ms
-	amp = np.array([4.20, 2.39, 1.37, 1.00, .65, .35]) # V
+	# tau = np.arange(20,124,20) # ms
+	# amp = np.array([4.20, 2.39, 1.37, 1.00, .65, .35]) # V
+	tau = np.arange(2,32,2)
+	amp = np.array([9.84, 8.86, 7.92, 7.06, 6.58, 6.06, 5.50, 5.12, 4.74, 4.50, 4.14, 3.96, 3.70, 3.50, 3.30])
 
-	T = np.linspace(0,120,1000)
-	par_m = [7,40]
+	T = np.linspace(0,60,1000)
+	par_m = [12,20,1]
 	A_m = expfit(par_m,T)
 
 	par_f = df.least_square(expfit,par_m,tau,amp)
-	# testfit(.5,0,par_f) # A_0
-	# testfit(3,1,par_f) # t_2
+	# testfit(.3,0,par_f) # A_0
+	# testfit(.3,1,par_f) # t_2
+	# testfit(.1,2,par_f) # C
 	A_f = expfit(par_f,T)
 
-	A_0 = dg.var('A_0',par_f[0],.5,'V')
-	t_2 = dg.var('2 tau_2',par_f[1],3,'ms')
+	A_0 = dg.var(par_f[0],.3,'V')
+	t_2 = dg.var(par_f[1],.3,'ms')
+	C = dg.var(par_f[2],.1,'V')
+
+	tau_2 = err.err7(t_2)
+	# tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -232,8 +240,8 @@ def part7(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		plt.plot(tau,amp, 's', color='b', label='data')
 		plt.plot(T,A_m,'-', color='m', lw=2, label='manual fit')
 		plt.plot(T,A_f,'-', color='r', lw=2, label='least square fit')
-		note='$A = A_0 e^{-t/2\\tau_2}$\n$A_0 = %s \pm %s\ [V]$\n$2\\tau_2 = %s \pm %s\ [ms]$' % (A_0.pval,A_0.perr,t_2.pval,t_2.perr)
-		plt.annotate(note, xy=(60,2), color='r', fontsize=fs)
+		note='$A = A_0 e^{-t/2\\tau_2} + C$\n$A_0 = %s \pm %s\ [V]$\n$\\tau_2 = %s \pm %s\ [ms]$\n$C = %s \pm %s\ [V]$' % (A_0.pval,A_0.perr,tau_2.pval,tau_2.perr,C.pval,C.perr)
+		plt.annotate(note, xy=(30,4), color='r', fontsize=fs)
 
 		plt.xlim([min(T),max(T)])
 		plt.legend(loc='best', numpoints=1)
@@ -245,15 +253,11 @@ def part7(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		else:
 			plt.show()
 
-	tau_2 = err.err7('part7',t_2)
-	# tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
-	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
-
 	if printA == True:
 		print("tau2 = %s +- %s" % (tau_2.pval,tau_2.perr))
-		print("tau2 = %s +- %s" % (tau2.pval,tau2.perr))
+		# print("tau2 = %s +- %s" % (tau2.pval,tau2.perr))
 
-	return tau_2, tau2
+	return tau_2
 
 def part8a(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
@@ -273,10 +277,13 @@ def part8a(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 	# testfit(.01,1,par_f) # t_0
 	A_f = quadfit(par_f,T)
 
-	alpha = dg.var('alpha',par_f[0],1,'V/s^2')
-	beta = dg.var('beta',par_f[2],.7,'V/s')
-	t_1 = dg.var('t_1',par_f[1],.01,'ms')
-	A_0 = dg.var('A_0',par_f[3],.05,'V')
+	alpha = dg.var(par_f[0],1,'V/s^2')
+	beta = dg.var(par_f[2],.7,'V/s')
+	t_1 = dg.var(par_f[1],.01,'ms')
+	A_0 = dg.var(par_f[3],.05,'V')
+
+	tau_1 = err.err8a(t_1)
+	# tau1 = err.quad_err('part8a',alpha,beta,A_0,T,A_f)
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -287,7 +294,7 @@ def part8a(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		plt.plot(tau,amp, 's', color='b', label='data')
 		plt.plot(T,A_m,'-', color='m', lw=2, label='manual fit')
 		plt.plot(T,A_f,'-', color='r', lw=2, label='least square fit')
-		note='$A = \\alpha (t_q-t_1)^2 + \\beta (t_q-t_1) + \gamma$\n$\\alpha = %s \pm %s\ [V/s^2]$\n$\\beta = %s \pm %s\ [V/s]$\n$\\gamma = %s \pm %s\ [V]$\n$t_1 = %s \pm %s\ [ms]$' % (alpha.pval,alpha.perr,beta.pval,beta.perr,A_0.pval,A_0.perr,t_1.pval,t_1.perr)
+		note='$A = \\alpha (t_q-t_1)^2 + \\beta (t_q-t_1) + \gamma$\n$\\alpha = %s \pm %s\ [V/s^2]$\n$\\beta = %s \pm %s\ [V/s]$\n$\\gamma = %s \pm %s\ [V]$\n$t_1 = %s \pm %s\ [ms]$\n$\\tau_1 = %s \pm %s\ [ms]$' % (alpha.pval,alpha.perr,beta.pval,beta.perr,A_0.pval,A_0.perr,t_1.pval,t_1.perr,tau_1.pval,tau_1.perr)
 		plt.annotate(note, xy=(2.8,1.5), color='r', fontsize=fs)
 
 		plt.xlim([min(T),max(T)]) 
@@ -300,15 +307,11 @@ def part8a(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		else:
 			plt.show()
 
-	tau_1 = err.err8a('part8a',t_1)
-	# tau1 = err.quad_err('part8a',alpha,beta,A_0,tau,amp)
-	tau1 = err.quad_err('part8a',alpha,beta,A_0,T,A_f)
-
 	if printA == True:
 		print("tau_1_g = %s +- %s" % (tau_1.pval,tau_1.perr))
-		print("tau1_g = %s +- %s" % (tau1.pval,tau1.perr))
+		# print("tau1_g = %s +- %s" % (tau1.pval,tau1.perr))
 
-	return tau_1, tau1
+	return tau_1
 
 def part8b(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 
@@ -316,16 +319,21 @@ def part8b(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 	amp = np.array([4, 1.71, .76, .43]) # V
 
 	T = np.linspace(0,120,1000)
-	par_m = [7,30]
+	par_m = [7,30,0]
 	A_m = expfit(par_m,T)
 
 	par_f = df.least_square(expfit,par_m,tau,amp)
-	# testfit(.5,0,par_f) # A_0
+	# testfit(.3,0,par_f) # A_0
 	# testfit(.8,1,par_f) # t_2
+	# testfit(.1,2,par_f) # C
 	A_f = expfit(par_f,T)
 
-	A_0 = dg.var('A_0',par_f[0],.5,'V')
-	t_2 = dg.var('t_2',par_f[1],.8,'ms')
+	A_0 = dg.var(par_f[0],.3,'V')
+	t_2 = dg.var(par_f[1],.8,'ms')
+	C = dg.var(par_f[2],.1,'V')
+
+	tau_2 = err.err8b(t_2)
+	# tau2 = err.exp_err(A_0,T[1:],A_f[1:],double='yes')
 
 	if plotA == True:
 		fig = plt.figure(figsize=size)
@@ -336,7 +344,7 @@ def part8b(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		plt.plot(tau,amp, 's', color='b', label='data')
 		plt.plot(T,A_m,'-', color='m', lw=2, label='manual fit')
 		plt.plot(T,A_f,'-', color='r', lw=2, label='least square fit')
-		note='$A = A_0 e^{-t/2\\tau_2}$\n$A_0 = %s \pm %s\ [V]$\n$2\\tau_2 = %s \pm %s\ [ms]$' % (A_0.pval,A_0.perr,t_2.pval,t_2.perr)
+		note='$A = A_0 e^{-t/2\\tau_2} + C$\n$A_0 = %s \pm %s\ [V]$\n$\\tau_2 = %s \pm %s\ [ms]$\n$C = %s \pm %s\ [V]$' % (A_0.pval,A_0.perr,tau_2.pval,tau_2.perr,C.pval,C.perr)
 		plt.annotate(note, xy=(60,1.5), color='r', fontsize=fs)
 
 		plt.xlim([min(T),max(T)])
@@ -349,14 +357,9 @@ def part8b(plotA=True,printA=False,saveA=False,fs=20,size=(15,7.5)):
 		else:
 			plt.show()
 
-	tau_2 = err.err8b('part8b',t_2)
-	# tau2 = err.exp_err(tau_2,A_0,tau,amp,double='yes')
-	tau2 = err.exp_err(tau_2,A_0,T[1:],A_f[1:],double='yes')
-
 	if printA == True:
 		print("tau_2_g = %s +- %s" % (tau_2.pval,tau_2.perr))
-		print("tau2_g = %s +- %s" % (tau2.pval,tau2.perr))
+		# print("tau2_g = %s +- %s" % (tau2.pval,tau2.perr))
 
-	return tau_2, tau2
+	return tau_2
 
-	
