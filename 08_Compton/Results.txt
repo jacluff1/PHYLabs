@@ -1,0 +1,7 @@
+Analysis Part 1
+Fitting Channels = 56 , 98
+Fitting keV = 356 , 661
+A , B = -50.666666666666686 , 7.261904761904762
+Compton Fit: m_e c^2 , E = 446.302040306 , 634.828214301
+Compton Error: 64.6979596935 , 26.1717856992
+Compton percent Error: 12.6610488637 , 3.95942294995

@@ -1,0 +1,53 @@
+>>> Error in Brightness Temp = 30.5941170816 K
+Error in True Temp = 23.7325259224 K
+
+Error in Fig 2:
+X err = 30.5941170816 K
+Y err = 23.7325259224 K
+
+True Temps [ 1902.1  2058.1  2166.1  2310.1  2322.1  2346.1  2388.1] K
+
+Results for Fig 3:
+Data Fit ep = 0.569148051006
+Known Average ep for range = 0.273666666667
+epsilon error = -0.29548138434
+
+Brightness Temp Error = 30.5941170816 K
+Power Error = [ 0.016475  0.019975  0.023925  0.028525  0.030625  0.032525  0.034975] W
+
+Results for Fig 4:
+Experimental n = 3.94992620512
+Error in n = 0.0500737948829
+True Temp err = 23.7325259224 K
+Power err = [ 0.016475  0.019975  0.023925  0.028525  0.030625  0.032525  0.034975] W
+
+Results from Fig 5:
+Extraplated value for V_0 = 1.2 V
+V_0 err = 0.1 V
+Voltage err = 0.005 V
+Current err = 0.005 A
+error not shown on graph because it looks sloppy
+
+e/m and n error:
+em = 4.14047462534 E11 C/kg
+Error in e/m = -2.38022849854 E11 C/kg
+Error in e/m = -135.2213456 percent
+n = 1.30153960091
+Error in n = 0.198460399095
+
+Results from Fig 6:
+I_0 = [  0.135   0.82    4.      8.9    12.2  ] mA
+I_0 uncertainty = [  0.01   0.1   10.     1.     1.  ] mA
+Voltage err = 0.005 V
+Current err = 0.005 A
+error not shown on graph because it looks sloppy
+
+Error in Fig 7:
+Y err not shown on graph; looks cluncky in semi-log plot
+Error in Temp = 23.7325259224 K
+Error in J_0/T^2 = [ 0.05010278  0.27507073  1.1857542   2.60160752  3.49421427] A K^-2 m^-2$
+
+Slope = 34701.3189604 K
+Slope error = 385.356534718 K
+Work Function for Tungsten = 2.99076848244 V
+Error in Work Function = 1.0 V

@@ -1,0 +1,98 @@
+Part III , Case 1:
+Compare Cu_alpha and 124 Am lines to find A,B parameters.
+Fitting channels = 270 , 1970
+Adjusting paramaters of figure 1 manually, error in fitting channels = \pm 1
+Use 'keV = A + Bx', the fitting channels, and Cu_alpha and 241Am to find A and B
+A , B = -0.133 , 0.03027
+Using last significant figure calculated : dA , dB = 6e-05 , 1e-06
+using error propagations, error in keV (x-axis) is found using fn.d_keV(keV)
+
+
+Part III , Case 2:
+Fig 3.2 shows the full spectrum of each element in the wheel
+the alpha line for the element and the  241 Am line is plotted to ensure that they line up.
+
+
+Cu:
+Plotted range : 5 , 10 keV
+Mosley Fit: C , sigma , keV , err_keV = 0.0102272329008 , 0.944444444444 , 8.0500002176747 , 2.17700431904e-07
+
+Rb:
+Plotted range : 10 , 20 keV
+Mosley Fit: C , sigma , keV , err_keV = 0.0103579845799 , 1.04554554555 , 13.390002777908352 , 2.77797467518e-06
+
+Mo:
+Plotted range : 10 , 25 keV
+Mosley Fit: C , sigma , keV , err_keV = 0.0103130386903 , 0.83033033033 , 17.47999933722249 , 6.6285794631e-07
+
+Ag:
+Plotted range : 15 , 30 keV
+Mosley Fit: C , sigma , keV , err_keV = 0.0104111024496 , 0.864364364364 , 22.159999034527374 , 9.65495324579e-07
+
+Ba:
+Plotted range : 25 , 40 keV
+Mosley Fit: C , sigma , keV , err_keV = 0.0106971217477 , 1.14364364364 , 32.18999091594209 , 9.08419715984e-06
+
+Tb:
+Plotted range : 35 , 60 keV
+Mosley Fit: C , sigma , keV , err_keV = 0.0109095932262 , 1.15465465465 , 44.46999071113006 , 9.28880223938e-06
+
+Part III , Case 3:
+only region of interests are plotted
+Mosley Fit C : 0.0104860122657 +/- 0.000239052724259
+Mosley Fit Sigma : 0.997163830496 +/- 0.127049160007
+Mosley Fit Error : 7.70144457327e-06
+Need to explain physcal meaning of Mosley fit values
+Boar Energy of Cu: 8.5782 keV
+Cu K_alpha : 8.05 keV
+Boar:K_alpha = 1.0656149068322982
+
+Cu : [Doublet pos,cps] , [Doublet err] = no , no
+Rb : [Doublet pos,cps] , [Doublet err] = no , no
+Mo : [Doublet pos,cps] , [Doublet err] = no , no
+Ag : [Doublet pos,cps] , [Doublet err] = [25.45, 120] , [0.005, 5]
+Ba : [Doublet pos,cps] , [Doublet err] = [37.25, 15] , [0.005, 0.5]
+Tb : [Doublet pos,cps] , [Doublet err] = [51.7, 260] , [0.05, 5]
+n , E_doublet , err_E_doublet_per = 4.011 , 25.44907820975156 , 0.1765
+n , E_doublet , err_E_doublet_per = 3.969 , 37.248077059158 , 0.2335
+n , E_doublet , err_E_doublet_per = 3.925 , 51.695223621260034 , 0.3958
+
+PartV
+
+Zn's K_beta is close to Mo's K_alpha. placing Zn in front of Mo attenuates the CPS
+
+PartV
+Fitting Lambda
+[ lambda , attenuation , model_CPS , error , error per] = [0.008108, 416.3, 1013, 14.3, 1.412]
+[ lambda , attenuation , model_CPS , error , error per] = [0.02223, 581.0, 848.0, 0.002525, 0.0002978]
+[ lambda , attenuation , model_CPS , error , error per] = [0.05608, 837.0, 592.0, 0.03679, 0.006214]
+[ lambda , attenuation , model_CPS , error , error per] = [0.08995, 916.0, 513.0, 0.001361, 0.0002653]
+[ lambda , attenuation , model_CPS , error , error per] = [0.1509, 1026, 403.0, 0.0325, 0.008066]
+[ lambda , attenuation , model_CPS , error , error per] = [0.09231, 746.0, 683.0, 0.00895, 0.00131]
+
+PartV
+Absorption Edge
+[ keV , Original , Attenuated , percent remaining ] = 
+[[    8.05         131.            10.            92.36641221]
+ [    8.9           38.             5.            86.84210526]
+ [   13.39         529.            77.            85.4442344 ]
+ [   14.96         127.            28.            77.95275591]
+ [   17.443       1402.           530.            62.19686163]
+ [   19.651        343.            18.            94.75218659]
+ [   22.16        2220.            61.            97.25225225]
+ [   24.94         515.            39.            92.42718447]
+ [   25.45         118.            16.            86.44067797]
+ [   32.19          83.            50.            39.75903614]
+ [   36.38          27.            15.            44.44444444]
+ [   37.25          20.            14.            30.        ]
+ [   44.47        2957.          1857.            37.19986473]
+ [   50.39         845.           589.            30.29585799]
+ [   51.7          264.           180.            31.81818182]]
+
+SECOND PART
+[ Mo ]
+theta_alpha = [  7.23985058  14.59864575  22.2141683 ]
+theta_beta =  [  6.42273111  12.92799528  19.6083922 ]
+
+[ W74 ]
+theta_23 = [ 12.27013402  25.15332987  39.61035168]

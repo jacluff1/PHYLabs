@@ -1,0 +1,35 @@
+Figure 3 shows diffraction data for A, B, AB on red laser and fitted using 'SSFit' and 'DSFit'
+Fit A:
+a/wavelength = 135.379
+slit width 'a' = R1*lambda = 90704.064 nm
+
+Fit B:
+a/wavelength = 138.527
+slit width 'a' = R1*lambda = 92813.117 nm
+
+Fit AB:
+a/wavelength = 66827.262
+slit width 'a' = R1 * lambda = 66827.262 nm
+d = 414243.655 nm
+
+sig1 statistics: half-width = 6.42058940348 , per = 0.65, delta_per = 0.001
+sig1 statistics: half-width = 0.00356428958616 , per = 0.65, delta_per = 0.001
+sig1 statistics: half-width = 9.26120942426 , per = 0.65, delta_per = 0.001
+sig1 statistics: half-width = 24.6720489623 , per = 0.65, delta_per = 0.001
+sig1 statistics: half-width = 0.00514121527352 , per = 0.65, delta_per = 0.001
+sig1 statistics: half-width = 0.0136963013299 , per = 0.65, delta_per = 0.001
+
+single photon diffraction table?
+get 5 mW, convert to eV, divide by energy/photon, gives photons/sec
+photons/sec = (5/1.602E-19) * (1/1000) * (670/1239.8) = 1.6866721083240242e+16 photons/sec
+multiply photons/sec by (L/c), where L is length of box and c is speed of light.
+this gives number of photons in the box at a time using the red laser.
+photons in the box at a time = 27736135.737282988
+
+Statistis of 100 count Data
+sig1 statistics: half-width = 12.3527966064 , per = 0.65, delta_per = 0.001
+sig2 statistics: half-width = 23.9 , per = 0.954499736104, delta_per = 0.00249973610364
+68 statistics: half-width = 12.9 , per = 0.68, delta_per = -0.0119999999999999
+95 statistics: half-width = 23.9 , per = 0.95, delta_per = -0.0020000000000000018
+sig1 statistics: half-width = 3.49013696006 , per = 0.65, delta_per = 0.001
+sig1 statistics: half-width = 12.3527966064 , per = 0.65, delta_per = 0.001

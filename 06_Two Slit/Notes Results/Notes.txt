@@ -1,0 +1,13 @@
+Get data for FourG:
+	statistal readings for A, B, AB, Neither AB
+	bulb = 8
+	record time where we switch between max and min settings on the micrometer
+
+find the x axis for diffraction graphs:
+	using the "angle" measurement?
+	perhaps the x axis is the angle?
+
+determine what the y axis should be on diffraction graphs:
+	counts?
+	volts?
+	something else?
