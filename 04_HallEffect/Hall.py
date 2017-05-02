@@ -14,8 +14,7 @@ pp      = {'figsize':(15,15),
            'lw':2,
            'ms':20,
            'data_style':'bo',
-           'fit_style':'-r'
-           }
+           'fit_style':'-r'}
 
 # units
 units   = {'time':'ms',
@@ -24,7 +23,11 @@ units   = {'time':'ms',
            'HallVolt':'mV',
            'SampCurr':'mA',
            'MagCurr':'A',
-           'MagField':'kG'
+           'MagField':'kG'}
+
+# constants and lab parameters
+C       = {'N':600,         # Number of coils
+           'mu0': 1/1000    # G -> kG
            }
 
 #===============================================================================
@@ -61,6 +64,9 @@ five_d = {'g':1.0, 'txt':'data/five_d.txt', 'I_p':9.1, 'I_B':2}
 """ Lab Functions """
 #-------------------------------------------------------------------------------
 
+def equation1(I,gap):
+    " find B"
+    return C['N'] * C['mu0'] * I / gap
 
 #===============================================================================
 """ Part 1.c)
@@ -105,27 +111,30 @@ Measure B vs gap size "g" for a fixed current, say I B = 1 Amp. A single polarit
 will suffice. Be sure that V = 0 when you loosen the pole pieces to change the gap
 (maybe unplug a cable) Use spacer blocks to fix the gap, and tighten the pole
 pieces to prevent accidental clamping shut (damage to sensor and fingers) """
+
+""" Part 6.a)
+Calculate the expected magnetic field, knowing N = 600 turns for each coil. (Hint:
+using Ampere's law, and assume  r very large). Estimate the flux leakage (as %)
+by comparing the calculated and measured magnetic field."""
 #-------------------------------------------------------------------------------
 
 def fig02(saveA=True):
 
+    # data
     X           = one_d['g']
     Y1          = one_d['B']
     Y           = Y1*X**2
 
+    # fit and theory
     X_fit       = np.linspace(.2,2.5,1000)
+    Y_T         = equation1(1,X_fit) * X_fit**2
 
-    # par1        = [2,.6,.2]
-    # def fitfunc1(p,x):
-    #     return p[0] * np.exp(-x/p[1]) + p[2]
-    # par_fit1    = df.least_square(fitfunc1,par1,X,Y)
-    # Y_fit1      = fitfunc1(par_fit1,X_fit)
-
-    # par2        = [1,1,1]
-    # def fitfunc2(p,x):
-    #     return p[0]*x**(-1) + p[1]
-    # par_fit2    = df.least_square(fitfunc2,par2,X,Y)
-    # Y_fit2      = fitfunc2(par_fit2,X_fit)
+    # find flux leak
+    Y_T1        = equation1(1,X) * X**2
+    Y_L         = (Y_T1 - Y) / Y_T1
+    yl_av       = np.average(Y_L)
+    yl_std      = np.std(Y_L)
+    yl          = dg.var(yl_av,yl_std)
 
     FIT         = df.lin_fit(X,Y,X_fit)
     Y_fit       = FIT['Y_fit']
@@ -140,21 +149,20 @@ def fig02(saveA=True):
     plt.xlim([min(X_fit),max(X_fit)])
 
     plt.plot(X,Y,pp['data_style'], markersize=pp['ms'], label='data' )
-    plt.plot(X_fit,Y_fit,pp['fit_style'], lw=pp['lw'], label='fit' )
-    # plt.plot(X_fit,Y_fit1,pp['fit_style'], lw=pp['lw'], label='exponential fit' )
-    # plt.plot(X_fit,Y_fit2,'m', lw=pp['lw'], label='power fit' )
+    plt.plot(X_fit,Y_fit,pp['fit_style'], lw=pp['lw'], label='data fit' )
+    plt.plot(X_fit,Y_T,'g', lw=pp['lw'], label='theory')
 
     plt.legend(loc='best', fontsize=pp['fs'], numpoints=1)
-
-    # note        = '$I_B = c_1 x^{-1} + c_3$\n$c_1 = %s \pm %s$\n$c_2 = %s \pm %s$' % (par_fit2[0],0,par_fit2[1],0)
-    # plt.annotate(note, xy=(.5,1.5), color='m', fontsize=pp['fs'])
 
     note        = 'y = m x + b\n\
     m = %s $\pm$ %s [kG cm]\n\
     b = %s $\pm$ %s [kG cm$^2$]\n\
     R$^2$ = %s'\
     % (m.pval,m.perr,b.pval,b.perr,"{0:.4f}".format(R2) )
-    plt.annotate(note, xy=(.3,1.2), color='r', fontsize=pp['fs'])
+    plt.annotate(note, xy=(.3,1.1), color='r', fontsize=pp['fs'])
+
+    note1       = '100 (B$_T$ - B$_L$) / B$_T$ = %s $\pm$ %s percent' % (yl.pval,yl.perr)
+    plt.annotate(note1, xy=(.3,1), color='g', fontsize=pp['fs'])
 
     if saveA:
         fig.savefig('png/fig02.png')
@@ -162,17 +170,8 @@ def fig02(saveA=True):
     else:
         plt.show()
 
-    dic         =   {'X':X, 'Y':Y, 'fit':FIT}
+    dic         =   {'X':X, 'Y':Y, 'fit':FIT, 'theory':Y_T, 'leak':yl.val, 'leak_error':yl.err}
     return pd.Series(dic)
-
-#===============================================================================
-""" Part 6.a)
-Calculate the expected magnetic field, knowing N = 600 turns for each coil. (Hint:
-using Ampere's law, and assume  r very large). Estimate the flux leakage (as %)
-by comparing the calculated and measured magnetic field."""
-#-------------------------------------------------------------------------------
-
-
 
 #===============================================================================
 """ Part 6.b)

@@ -1,0 +1,12 @@
+$ git status
+
+# ignore files
+**.npy
+**.pkl
+**.pyc
+
+# ignore folders
+__pycache__/
+.ipynb_checkpoints
+
+
