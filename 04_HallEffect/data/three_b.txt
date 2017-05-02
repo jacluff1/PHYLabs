@@ -1,4 +1,4 @@
-Time	SampCur	SampVolt	HallVolt	MagField	MagCurr	Temp
+Time	Temp	SampVolt	HallVolt	SampCurr	MagCurr	MagField		
  0.00	 24.0	 1.29	 14.4	 29.8	0.00927	0.0289
 0.100	 24.0	 1.29	 14.4	 29.9	0.00454	0.0288
 0.200	 23.9	 1.29	 14.6	 29.8	0.00543	0.0288
