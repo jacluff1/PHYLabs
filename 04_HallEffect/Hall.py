@@ -26,8 +26,12 @@ units   = {'time':'ms',
            'MagField':'kG'}
 
 # constants and lab parameters
-C       = {'N':600,         # Number of coils
-           'mu0': 1/1000    # G -> kG
+C       = {'N':     600,            # number of coils
+           'mu0':   1/1000,         # permiability from Gs -> kGs
+           'k':     8.6173303e-5,   # boltzmann constant [eV/K]
+           'A':     np.pi * .04**2, # area of solenoid [m^2]
+           'L':     60,             # inductance [H]
+           'T':     .1              # kGs -> T conversion
            }
 
 #===============================================================================
@@ -179,12 +183,56 @@ Estimate  r (dimensionless ratio / 0 for the pole pieces, knowing the i
 L = 60 Henry for the two coils in series."""
 #-------------------------------------------------------------------------------
 
+def fig07(saveA=True):
+
+    data    = pd.read_table(three_d['txt'])
+    B       = data['MagField'].values * C['T']      # T
+    I       = data['MagCurr'].values                # A
+
+    X       = B                                     # T
+    Y       = I * C['L'] / C['A']                   # T
+
+    X_fit       = np.linspace(min(X),max(X),1000)
+    FIT         = df.lin_fit(X,Y,X_fit)
+    Y_fit       = FIT['Y_fit']
+    m           = FIT['m']
+    b           = FIT['b']
+    R2          = FIT['R2']
+
+    mu_rval     = m.val
+    mu_rerr     = m.err
+    mu_r        = dg.var(mu_rval,mu_rerr)
+
+    fig     = plt.figure(figsize=pp['figsize'])
+    plt.title('Finding $\mu_r$', fontsize=pp['fs']+2)
+    plt.xlabel('B [ T ]', fontsize=pp['fs'])
+    plt.ylabel('I L / A [ T ]', fontsize=pp['fs'])
+    plt.xlim([min(X),max(X)])
+
+    plt.plot(X,Y, color='c', lw=pp['lw'], label='p-Ge')
+    plt.plot(X_fit,Y_fit,pp['fit_style'], lw=pp['lw'], label='fit')
+    plt.legend(loc='best', fontsize=pp['fs'])
+
+    note        = 'y = m x + b\n\
+    m = $\mu_r$ = %s $\pm$ %s [ H/m ]\n\
+    b = %s $\pm$ %s [ T ]\n\
+    R$^2$ = %s'\
+    % (m.pval,m.perr,b.pval,b.perr,"{0:.4f}".format(R2) )
+    plt.annotate(note, xy=(.097,24500), color='r', fontsize=pp['fs'])
+
+    if saveA:
+        fig.savefig('png/fig07.png')
+        plt.close()
+    else:
+        plt.show()
+
+    dic     =   {'mu_val':mu_r.val, 'mu_err':mu_r.err,  'mu_r':mu_r}
+    return pd.Series(dic)
+
 #===============================================================================
 """ Part 6.c)
 Estimate the magnetic remnance of the pole pieces."""
 #-------------------------------------------------------------------------------
-
-
 
 #===============================================================================
 """ Part 6.d)
@@ -270,9 +318,17 @@ this find the band gap (in eV) for Ge."""
 
 def fig05(saveA=True):
 
-    data        = NotImplemented
-    X           = data[NotImplemented].values
-    Y           = data[NotImplemented].values
+    data        = pd.read_table(five_c['txt'])
+    T           = data['Temp'].values               # K
+    Vs          = data['SampVolt'].values           # V
+    Is          = data['SampCurr'].values / 1000    # A
+    l           = 20e-3                             # m
+    A           = 10 / (1000)**2                    # m^2
+    sigma       = l * Is / A / Vs                   # 1/(Ohm m)
+
+    # linearize
+    X           = 1/(T + 273.15)                    # 1/K
+    Y           = np.log(Vs)
 
     X_fit       = np.linspace(min(X),max(X),1000)
     FIT         = df.lin_fit(X,Y,X_fit)
@@ -281,18 +337,40 @@ def fig05(saveA=True):
     b           = FIT['b']
     R2          = FIT['R2']
 
+    E_gval      = 2 * C['k'] * m.val
+    E_gerr      = 2 * C['k'] * m.err
+    E_g         = dg.var(E_gval,E_gerr)
+
     fig = plt.figure(figsize=pp['figsize'])
     plt.title('i-Ge Band Gap', fontsize=pp['fs']+2)
-    plt.xlabel(NotImplemented, fontsize=pp['fs'])
-    plt.ylabel(NotImplemented, fontsize=pp['fs'])
+    plt.xlabel("1/T [ 1/K ]", fontsize=pp['fs'])
+    plt.ylabel("ln ( V$_s$ [ V ] )", fontsize=pp['fs'])
+    plt.xlim(min(X_fit),max(X_fit))
 
-    plt.plot(X,Y,'bo', markersize=pp['ms'], label='data')
+    plt.plot(X,Y,'b', lw=pp['lw'], label='data')
     plt.plot(X_fit,Y_fit,'r', lw=pp['lw'], label='fit')
 
-    note='$Y=m x + b$\n$m = %s \pm %s\ units$\n$b = %s \pm %s\ units$\n$R^2 = %s$' % (m.pval,m.perr,b.pval,b.perr,R2)
-    plt.annotate(note, xy=NotImplemented, color='r', fontsize=pp['fs'])
+    note = '    Y=m x + b\n\
+    ln( V$_s$ ) = ( -E$_g$/2k ) ( 1/T ) + ln( A )\n\
+    m = %s $\pm$ %s\n\
+    b = %s $\pm$ %s\n\
+    R$^2$ = %.4f\n\
+    E$_g$ = 2 k m $\pm$ 2 k $\Delta$ m\n\
+         = %s $\pm$ %s eV'\
+    % (m.pval,m.perr,b.pval,b.perr,R2,E_g.pval,E_g.perr)
+    plt.annotate(note, xy=(.00255,.9), color='r', fontsize=pp['fs'])
 
     plt.legend(loc='best', numpoints=1)
+
+    if saveA:
+        fig.savefig('png/fig05.png')
+        plt.close()
+    else:
+        plt.show()
+
+    dic     =   {'m_val':m.val,     'm_err':m.err,      'm':m,
+                 'E_g_val':E_g.val, 'E_gerr':E_g.err,   'E_g':E_g}
+    return dic
 
 #===============================================================================
 """ Part 6.g)
